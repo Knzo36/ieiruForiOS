@@ -20,6 +20,7 @@ class LocationViewController: UIViewController {
     var latitude: Double?
     var longitude: Double?
     var usersIeiru: String?
+    var registeredName: String?
     
     let urlString = "http://18.176.193.22/users"
     
@@ -113,11 +114,20 @@ class LocationViewController: UIViewController {
     
     func postLocationInfo() {
         guard let url = URL(string: urlString) else { return }
-        let registeredName = UserDefaults.standard.string(forKey: "name")
+        let userDefaults = UserDefaults.standard
+//        userDefaults.removeObject(forKey: "name")
+        let name = userDefaults.object(forKey: "name") as? String
+        guard let nameText = nameTextField.text else { return }
+        if let name = name {
+            registeredName = name
+        } else {
+            UserDefaults.standard.set(self.nameTextField.text, forKey: "name")
+            registeredName = nameText
+        }
         
         let parameters: [String: Any] = [
             "user": [
-                "name": registeredName ?? nameTextField.text,
+                "name": registeredName,
                 "latitude" : self.latitude,
                 "longitude": self.longitude
             ]
@@ -125,9 +135,7 @@ class LocationViewController: UIViewController {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("Application/json", forHTTPHeaderField: "Content-Type")
-        guard let httpBody = try? JSONSerialization.data(withJSONObject: parameters, options: []) else {
-            return
-        }
+        guard let httpBody = try? JSONSerialization.data(withJSONObject: parameters, options: []) else { return }
         request.httpBody = httpBody
         request.timeoutInterval = 20
         let session = URLSession.shared
@@ -138,7 +146,6 @@ class LocationViewController: UIViewController {
             if let data = data {
                 do {
                     let json = try JSONSerialization.jsonObject(with: data, options: [])
-                    UserDefaults.standard.set(self.nameTextField.text, forKey: "name")
                     print(json)
                 } catch {
                     print(error)
