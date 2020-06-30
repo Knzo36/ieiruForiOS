@@ -50,7 +50,7 @@ class LocationViewController: UIViewController {
     }
     
     @IBAction func tapFinishBtn(_ sender: Any) {
-        locationManager.stopUpdatingLocation()
+        locationManager.stopMonitoringSignificantLocationChanges()
     }
     
     func setupLocationManager() {
@@ -62,7 +62,7 @@ class LocationViewController: UIViewController {
         if status == .authorizedAlways {
             locationManager.delegate = self
             locationManager.requestLocation()
-            locationManager.startUpdatingLocation()
+            locationManager.startMonitoringSignificantLocationChanges()
             locationManager.allowsBackgroundLocationUpdates = true
         } else {
             showAlert()
